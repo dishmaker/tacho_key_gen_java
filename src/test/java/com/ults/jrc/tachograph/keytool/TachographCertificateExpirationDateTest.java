@@ -75,12 +75,12 @@ public class TachographCertificateExpirationDateTest {
     @Test(expected = TachographKeyToolException.class)
     public void testDateTimeBeforeEpoch() {
         LocalDateTime dt = LocalDateTime.ofEpochSecond(-1, 0, ZoneOffset.UTC);
-        TachographCertificateExpirationDate exd = new TachographCertificateExpirationDate(dt);
+        new TachographCertificateExpirationDate(dt);
     }
 
     @Test(expected = TachographKeyToolException.class)
     public void testDateTimeAfterEnd() {
         LocalDateTime dt = LocalDateTime.ofEpochSecond(0x100000000L, 0, ZoneOffset.UTC);
-        TachographCertificateExpirationDate exd = new TachographCertificateExpirationDate(dt);
+        new TachographCertificateExpirationDate(dt);
     }
 }

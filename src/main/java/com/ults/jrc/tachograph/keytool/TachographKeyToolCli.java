@@ -507,7 +507,7 @@ public class TachographKeyToolCli {
         }
     }
 
-    private static String listOptions(List options) {
+    private static String listOptions(List<?> options) {
         String result = "";
         for (Object s : options)
             result += "\t" + s + "\r\n";
