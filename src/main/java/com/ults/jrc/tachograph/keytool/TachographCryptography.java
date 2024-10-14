@@ -33,7 +33,8 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * Cryptographic methods for Generation-2 Smart Tachograph.
  *
- * Provides methods for both symmetric and asymmetric cryptographic methods as specified in
+ * Provides methods for both symmetric and asymmetric cryptographic methods as
+ * specified in
  * Commission Implementing Regulation (EU) 2016/799 of 18 March 2016.
  *
  * @author Klaas Mateboer
@@ -122,9 +123,10 @@ public class TachographCryptography {
     /**
      * Create a self-signed certificate.
      *
-     * @param type the certificate type
-     * @param keyPair the key pair holding the public key to be certified, and the private key to sign the certificate
-     * @param holder the certificate holder reference
+     * @param type           the certificate type
+     * @param keyPair        the key pair holding the public key to be certified,
+     *                       and the private key to sign the certificate
+     * @param holder         the certificate holder reference
      * @param validityPeriod the validity period
      * @return the self-signed certificate
      */
@@ -136,9 +138,9 @@ public class TachographCryptography {
     /**
      * Get a body for a self-signed certificate.
      *
-     * @param type the type of the certificate
-     * @param keyPair the keyPair providing the OID and public key
-     * @param holder the reference to holder and authority
+     * @param type           the type of the certificate
+     * @param keyPair        the keyPair providing the OID and public key
+     * @param holder         the reference to holder and authority
      * @param validityPeriod the validity period
      * @return the body
      */
@@ -151,18 +153,18 @@ public class TachographCryptography {
                 new TachographCertificatePublicKey(keyPair.oid, keyPair.publicKey),
                 new TachographCertificateHolderReference(holder),
                 new TachographCertificateEffectiveDate(validityPeriod.effectiveDate),
-                new TachographCertificateExpirationDate(validityPeriod.expirationDate)
-        );
+                new TachographCertificateExpirationDate(validityPeriod.expirationDate));
     }
 
     /**
      * Get a certificate body derived from request and authority certificate.
      *
-     * The authority reference is derived from the holder reference of the signer. All other fields are taken
+     * The authority reference is derived from the holder reference of the signer.
+     * All other fields are taken
      * from the request certificate.
      *
      * @param request the certificate body of the request
-     * @param signer the certificate body of the signer
+     * @param signer  the certificate body of the signer
      * @return the certificate body with updated authority reference
      */
     private TachographCertificateBody getCertificateBody(TachographCertificateBody request,
@@ -173,11 +175,13 @@ public class TachographCryptography {
     /**
      * Get a link certificate body derived from request and authority certificate.
      *
-     * The authority reference is derived from the holder reference of the signer. The expiration date is also
-     * taken from the signer. All other fields are taken from the request certificate.
+     * The authority reference is derived from the holder reference of the signer.
+     * The expiration date is also
+     * taken from the signer. All other fields are taken from the request
+     * certificate.
      *
      * @param request the certificate body of the request
-     * @param signer the certificate body of the signer
+     * @param signer  the certificate body of the signer
      * @return the certificate body with updated authority reference
      */
     private TachographCertificateBody getLinkCertificateBody(TachographCertificateBody request,
@@ -188,8 +192,8 @@ public class TachographCryptography {
     /**
      * Sign a certificate.
      *
-     * @param request the request certificate
-     * @param caPrivateKey the signing key
+     * @param request       the request certificate
+     * @param caPrivateKey  the signing key
      * @param caCertificate the certificate of the certificate authority
      * @return the signed certificate
      */
@@ -201,8 +205,8 @@ public class TachographCryptography {
     /**
      * Link a certificate.
      *
-     * @param request the request certificate
-     * @param caPrivateKey the signing key
+     * @param request       the request certificate
+     * @param caPrivateKey  the signing key
      * @param caCertificate the certificate of the certificate authority
      * @return the signed certificate
      */
@@ -212,9 +216,10 @@ public class TachographCryptography {
     }
 
     /**
-     * Get a certificate with given body and a signature created by the given private key.
+     * Get a certificate with given body and a signature created by the given
+     * private key.
      *
-     * @param body the body of the new certificate
+     * @param body         the body of the new certificate
      * @param caPrivateKey the signing key
      * @return the signed certificate
      */
@@ -256,7 +261,7 @@ public class TachographCryptography {
     /**
      * Verify the signature of a certificate.
      *
-     * @param certificate the certificate to be verified
+     * @param certificate   the certificate to be verified
      * @param caCertificate the CA certificate
      */
     public void verify(TachographCertificate certificate, TachographCertificate caCertificate) {
@@ -304,7 +309,7 @@ public class TachographCryptography {
     private void checkCertificationAuthorityKID(TachographCertificationAuthorityKID kid) {
         if (!kid.nationAlpha.equals("EC "))
             warn("nation alpha of ERCA certificate holder reference is not equal to EC: " + kid.nationAlpha);
-        if (kid.nationNumeric != (byte)0xfd)
+        if (kid.nationNumeric != (byte) 0xfd)
             warn("nation numeric of ERCA certificate holder reference is not equal to 0xFD");
     }
 
@@ -321,17 +326,25 @@ public class TachographCryptography {
             warn("certificate expiration date is before its effective date");
         if (expirationDate.equals(effectiveDate))
             warn("certificate expiration date is equal to its effective date");
-        for (TachographCertificateType t : TachographCertificateType.values())
-            if (t.authorisationType == authorisationType)
-                if (effectiveDate.plusMonths(t.validity).equals(expirationDate))
-                    return;
-        warn("certificate validity period does not match with holder authorisation type " + authorisationType);
+
+        TachographCertificateType[] cts = TachographCertificateType.tryFromAuthorizationType(authorisationType);
+
+        if (cts.length == 0) {
+            warn("certificate authorisationType not found: " + authorisationType);
+            return;
+        }
+        if (!TachographCertificateType.isValidValidityPeriod(cts, effectiveDate, expirationDate)) {
+            warn("certificate validity period does not match with holder authorisation type " + authorisationType
+                    + " = " + TachographCertificateType.namesOf(cts));
+        }
+
     }
 
     /**
-     * Check whether the authorisation of the certificate and that of the CA is known as a valid combination.
+     * Check whether the authorisation of the certificate and that of the CA is
+     * known as a valid combination.
      *
-     * @param certificate the signed certificate
+     * @param certificate   the signed certificate
      * @param caCertificate the CA certificate
      * @return true iff the combination of the authorisations is allowed
      */
@@ -368,7 +381,7 @@ public class TachographCryptography {
      * Derive an encrypted pairing key.
      *
      * @param msmk the MSMK
-     * @param pk the plain pairing key
+     * @param pk   the plain pairing key
      * @return the encrypted pairing key
      */
     public byte[] encryptPairingKey(byte[] msmk, byte[] pk) {
@@ -380,7 +393,7 @@ public class TachographCryptography {
      * Encrypt a Motion Sensor Extended Serial Number.
      *
      * @param msmk the MSMK
-     * @param esn the extended serial number
+     * @param esn  the extended serial number
      * @return the encrypted result
      */
     public byte[] encryptMsExtendedSerialNumber(byte[] msmk, TachographExtendedSerialNumber esn) {
@@ -451,7 +464,8 @@ public class TachographCryptography {
         try {
             aesCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, 0, key.length, "AES"), AES_IV);
             return aesCipher.doFinal(data);
-        } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | InvalidAlgorithmParameterException ex) {
+        } catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException
+                | InvalidAlgorithmParameterException ex) {
             throw new EncryptionFailure(ex);
         }
     }
