@@ -2,10 +2,7 @@ package com.ults.jrc.tachograph.keytool;
 
 import static com.ults.jrc.tachograph.keytool.TachographDefinitions.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,6 +10,8 @@ import java.util.List;
 /**
  * Enumeration of supported tachograph certificate types.
  *
+ * edited by dishmaker
+ * 
  * @author Klaas Mateboer
  */
 public enum TachographCertificateType {
