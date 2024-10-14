@@ -2,7 +2,10 @@ package com.ults.jrc.tachograph.keytool;
 
 import static com.ults.jrc.tachograph.keytool.TachographDefinitions.*;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -141,12 +144,38 @@ public enum TachographCertificateType {
         return sb.toString();
     }
 
-    public static boolean isValidValidityPeriod(TachographCertificateType[] cts, LocalDateTime effectiveDate, LocalDateTime expirationDate) {
-        for(TachographCertificateType ct : cts) {
+    public static boolean isValidValidityPeriod(TachographCertificateType[] cts, LocalDateTime effectiveDate,
+            LocalDateTime expirationDate) {
+        for (TachographCertificateType ct : cts) {
             if (effectiveDate.plusMonths(ct.validity).equals(expirationDate)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public static String validityMonthsOf(TachographCertificateType[] cts) {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (TachographCertificateType t : cts) {
+            if (!first) {
+                sb.append(" | ");
+            }
+            first = false;
+            sb.append(monthsToYearMonthStr(t.validity));
+        }
+        return sb.toString();
+    }
+
+    public static String monthsToYearMonthStr(int months) {
+        int years = months / 12;
+        months = months % 12;
+        if (years > 0 && months != 0) {
+            return years + "y " + months + "mo";
+        } else if (years > 0) {
+            return years + "y";
+        } else {
+            return months + "mo";
+        }
     }
 }

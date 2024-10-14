@@ -21,6 +21,7 @@ import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -334,8 +335,13 @@ public class TachographCryptography {
             return;
         }
         if (!TachographCertificateType.isValidValidityPeriod(cts, effectiveDate, expirationDate)) {
+            long monthsBetween = ChronoUnit.MONTHS.between(effectiveDate, expirationDate);
+            String expected = TachographCertificateType.validityMonthsOf(cts);
+            String given = TachographCertificateType.monthsToYearMonthStr((int) monthsBetween);
+
             warn("certificate validity period does not match with holder authorisation type " + authorisationType
-                    + " = " + TachographCertificateType.namesOf(cts));
+                    + " = " + TachographCertificateType.namesOf(cts) + ", months expected=" + expected
+                    + ", months given=" + given);
         }
 
     }
